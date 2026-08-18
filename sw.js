@@ -1,5 +1,5 @@
-var CACHE='tansica-v1';
-var ASSETS=['./','index.html','manifest.webmanifest','icon.svg'];
+var CACHE='tansica-v2';
+var ASSETS=['./','index.html','manifest.webmanifest'];
 
 self.addEventListener('install',function(e){
   e.waitUntil(caches.open(CACHE).then(function(c){return c.addAll(ASSETS);}));
