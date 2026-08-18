@@ -1,9 +1,14 @@
 {
-  "name": "Tansica 天禧語造詞器",
-  "short_name": "天禧造詞",
+  "name": "泡泡機",
+  "short_name": "泡泡機",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
-  "background_color": "#f4f2ed",
-  "theme_color": "#26221b"
+  "background_color": "#f7f6e9",
+  "theme_color": "#f7f6e9",
+  "icons": [
+    { "src": "icon.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icon.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icon.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
 }
