@@ -3,9 +3,11 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Tansica 天禧語造詞器</title>
+<title>泡泡機</title>
+<link rel="icon" href="icon.png" type="image/png">
+<link rel="apple-touch-icon" href="icon.png">
 <link rel="manifest" href="manifest.webmanifest">
-<meta name="theme-color" content="#26221b">
+<meta name="theme-color" content="#f7f6e9">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <style>
   :root{
@@ -181,7 +183,7 @@ var DEF={
 var GRID_ID={type:'gType',nuc:'gNuc',con:'gCon',clu:'gClu',coda:'gCoda'};
 var W=JSON.parse(JSON.stringify(DEF));
 
-/* ================= 自動保存（localStorage） ================= */
+/* ================= 自動保存（localStorage；鍵名不變以保留舊設定） ================= */
 var STORE_KEY='tansica_gen_v1';
 function saveState(){
   try{
@@ -395,4 +397,4 @@ if('serviceWorker' in navigator){
 </script>
 </main>
 </body>
-</html>
+  </html>
