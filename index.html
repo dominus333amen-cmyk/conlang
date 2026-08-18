@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tansica 天禧語造詞器</title>
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#26221b">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<style>
+  :root{
+    --bg:#f4f2ed; --card:#fffdf8; --line:#e0dcd2;
+    --ink:#2a2620; --sub:#7a7365;
+    --accent:#a8842c; --ring:rgba(168,132,44,.16);
+    --dark:#26221b; --mid:#6e675c;
+    --light:#f0ede5; --light-hov:#e9e6df;
+    --r-card:12px; --r-ctl:8px; --r-btn:9px;
+  }
+  *{box-sizing:border-box}
+  html{-webkit-text-size-adjust:100%}
+  body{font-family:"Segoe UI","PingFang TC","Microsoft JhengHei",sans-serif;margin:0;background:var(--bg);color:var(--ink);font-size:14px;line-height:1.5}
+  main{max-width:860px;margin:22px auto 40px;padding:0 16px}
+  fieldset{border:1px solid var(--line);border-radius:var(--r-card);background:var(--card);margin:0 0 16px;padding:16px 18px;box-shadow:0 1px 4px rgba(60,45,20,.06)}
+  legend{font-weight:700;font-size:15px;color:var(--sub);padding:0 8px;letter-spacing:1px}
+  input[type=number]{text-align:center;-moz-appearance:textfield;appearance:textfield}
+  input[type=number]::-webkit-outer-spin-button,
+  input[type=number]::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
+  input[type=number],input[type=text]{border:1px solid var(--line);border-radius:var(--r-ctl);background:#fff;color:var(--ink);transition:border-color .15s,box-shadow .15s}
+  input[type=number]:focus,input[type=text]:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px var(--ring)}
+  input[type=checkbox]{accent-color:var(--accent);width:15px;height:15px;margin:0}
+  .frow{margin:12px 0;display:flex;align-items:center}
+  .frow label{display:flex;align-items:center;gap:8px;font-size:14px}
+  .gap{margin-left:auto}
+  input.num{width:64px;padding:7px 4px;font-size:14px}
+  button{border-radius:var(--r-btn);border:1px solid transparent;cursor:pointer;font-family:inherit;text-align:center;line-height:1.2;-webkit-tap-highlight-color:transparent;touch-action:manipulation;transition:filter .15s,background .15s,transform .06s}
+  button:active{transform:translateY(1px)}
+  button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+  .btnrow{display:flex;gap:10px;margin-top:16px}
+  .btnrow button{flex:1;padding:12px 0;font-size:15px}
+  button.primary{background:var(--dark);color:#fff;box-shadow:0 2px 5px rgba(0,0,0,.22)}
+  button.primary:hover{filter:brightness(1.25)}
+  button.dark{background:var(--mid);color:#fff;box-shadow:0 1px 4px rgba(0,0,0,.18)}
+  button.dark:hover{filter:brightness(1.15)}
+  #btnWeights{width:100%;margin-top:12px;padding:12px 0;font-size:15px;background:var(--light);border-color:var(--line);color:var(--ink)}
+  #btnWeights:hover{background:var(--light-hov)}
+  #out{background:#fbfaf6;border:1px solid var(--line);border-radius:var(--r-ctl);padding:12px 16px;min-height:120px;white-space:pre-wrap;font-size:14px;line-height:1.9}
+  .w{font-weight:600}
+  #msg{color:#2e7d32;font-size:12px}
+  .msgrow{margin:6px 0 0;min-height:0}
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(80px,1fr));gap:8px}
+  .cell{display:flex;flex-direction:column;align-items:center;gap:4px;font-size:13px;color:var(--sub)}
+  .cell input{width:100%;padding:10px 2px;font-size:14px;color:var(--ink)}
+  .resetline{display:flex;justify-content:flex-end;margin:2px 0 10px}
+  .resetline button{padding:11px 2px;font-size:13px;white-space:nowrap;background:var(--light);border-color:var(--line);color:var(--ink)}
+  .resetline button:hover{background:var(--light-hov)}
+  .toprow{display:flex;gap:10px;margin-bottom:16px}
+  .toprow button{flex:1;padding:11px 0;font-size:14px;background:var(--light);border-color:var(--line);color:var(--ink)}
+  .toprow button:hover{background:var(--light-hov)}
+  .advcol{display:flex;flex-direction:column;gap:8px;font-size:14px}
+  .advcol input{width:100%;padding:10px 12px;font-size:14px}
+</style>
+</head>
+<body>
+<main>
+
+<div id="page1">
+  <fieldset><legend>生成設定</legend>
+    <div class="frow">
+      <label>最小 <input class="num" type="number" id="smin" value="2" min="1" max="10"></label>
+      <label class="gap">最大 <input class="num" type="number" id="smax" value="3" min="1" max="10"></label>
+    </div>
+    <div class="frow">
+      <label>批量生成 <input class="num" type="number" id="batch" value="10" min="5" max="100"></label>
+      <label class="gap"><input type="checkbox" id="dedup" checked> 去重</label>
+    </div>
+    <div class="btnrow">
+      <button class="primary" onclick="run()">生成</button>
+      <button class="dark" onclick="copyOut()">複製結果</button>
+    </div>
+    <button id="btnWeights" onclick="showPage(2)">設置權重</button>
+    <div class="frow msgrow"><span id="msg"></span></div>
+  </fieldset>
+  <fieldset><legend>輸出</legend><div id="out"></div></fieldset>
+</div>
+
+<div id="page2" style="display:none">
+  <div class="toprow">
+    <button onclick="showPage(1)">← 返回生成</button>
+    <button onclick="resetAll()">恢復全部默認</button>
+  </div>
+  <fieldset><legend>一、音節類型權重</legend>
+    <div class="resetline"><button onclick="resetGroup('type')">恢復默認</button></div>
+    <div class="grid" id="gType"></div>
+  </fieldset>
+  <fieldset><legend>二、母音與雙母音權重</legend>
+    <div class="resetline"><button onclick="resetGroup('nuc')">恢復默認</button></div>
+    <div class="grid" id="gNuc"></div>
+  </fieldset>
+  <fieldset><legend>三、子音權重</legend>
+    <div class="resetline"><button onclick="resetGroup('con')">恢復默認</button></div>
+    <div class="grid" id="gCon"></div>
+  </fieldset>
+  <fieldset><legend>四、子音簇權重</legend>
+    <div class="resetline"><button onclick="resetGroup('clu')">恢復默認</button></div>
+    <div class="grid" id="gClu"></div>
+  </fieldset>
+  <fieldset><legend>五、韻尾權重</legend>
+    <div class="resetline"><button onclick="resetGroup('coda')">恢復默認</button></div>
+    <div class="grid" id="gCoda"></div>
+  </fieldset>
+  <fieldset><legend>六、進階選項</legend>
+    <div class="advcol">
+      <label>額外禁止的跨音節組合：</label>
+      <input type="text" id="bad" value="" placeholder="如 sf,sv">
+    </div>
+  </fieldset>
+</div>
+
+<script>
+/* ================= 頁面切換與寬度同步 ================= */
+function showPage(n){
+  document.getElementById('page1').style.display=(n===1)?'':'none';
+  document.getElementById('page2').style.display=(n===2)?'':'none';
+  window.scrollTo(0,0);
+  if(n===2)syncResetWidths();
+}
+function syncResetWidths(){
+  document.querySelectorAll('#page2 fieldset').forEach(function(fs){
+    var inp=fs.querySelector('.grid input');
+    var btn=fs.querySelector('.resetline button');
+    if(inp&&btn){
+      var w=inp.getBoundingClientRect().width;
+      if(w>0)btn.style.width=w+'px';
+    }
+  });
+}
+function initResizeSync(){
+  window.addEventListener('resize',syncResetWidths);
+  if(window.ResizeObserver){
+    var ro=new ResizeObserver(function(){syncResetWidths();});
+    document.querySelectorAll('#page2 .grid').forEach(function(g){ro.observe(g);});
+  }
+}
+/* ================= 輸入框聚焦：自動滾到鍵盤上方 ================= */
+function initInputScroll(){
+  var cur=null,t1=null,t2=null;
+  function bring(el){ if(el) el.scrollIntoView({block:'center',behavior:'smooth'}); }
+  document.addEventListener('focusin',function(e){
+    var t=e.target;
+    if(t&&t.tagName==='INPUT'){
+      cur=t;
+      clearTimeout(t1);
+      t1=setTimeout(function(){bring(cur);},300);
+    }
+  });
+  document.addEventListener('focusout',function(){ cur=null; });
+  if(window.visualViewport){
+    window.visualViewport.addEventListener('resize',function(){
+      clearTimeout(t2);
+      t2=setTimeout(function(){bring(cur);},80);
+    });
+  }
+}
+
+/* ================= 音系資料（造詞用） ================= */
+var DIPHS=['ai','ei','oi','au','eu'];
+var CONS=['p','b','t','d','c','g','ch','j','f','v','s','z','sh','h','m','n','r','l','y','w'];
+var CLUS=['pl','pr','bl','br','tr','dr','cl','cr','gl','gr','fl','fr','sp','st','sc'];
+var CODA_OK=['s','n','r','l'];
+var FRIC=['f','v','s','z','sh','h'];
+var P_CODA=0.10, P_ONSET_DOUBLE=0.10;
+
+/* ================= 默認權重 ================= */
+var DEF={
+ type:{V:25,CV:47,CCV:10,VC:5,CVC:10,CCVC:3},
+ nuc:{a:23,e:18,i:13,o:15,u:10,ai:6,ei:5,oi:4,au:5,eu:3},
+ con:{p:6,b:5,t:8,d:6,c:6,g:4,ch:2,j:2,f:3,v:4,s:8,z:2,sh:2,h:3,m:7,n:8,r:8,l:7,y:2,w:2},
+ clu:{pl:7,pr:9,bl:5,br:7,tr:9,dr:5,cl:6,cr:9,gl:9,gr:3,fl:7,fr:5,sp:6,st:9,sc:4},
+ coda:{s:30,n:30,r:25,l:15}
+};
+var GRID_ID={type:'gType',nuc:'gNuc',con:'gCon',clu:'gClu',coda:'gCoda'};
+var W=JSON.parse(JSON.stringify(DEF));
+
+/* ================= 自動保存（localStorage） ================= */
+var STORE_KEY='tansica_gen_v1';
+function saveState(){
+  try{
+    localStorage.setItem(STORE_KEY,JSON.stringify({
+      W:W,
+      smin:document.getElementById('smin').value,
+      smax:document.getElementById('smax').value,
+      batch:document.getElementById('batch').value,
+      dedup:document.getElementById('dedup').checked,
+      bad:document.getElementById('bad').value
+    }));
+  }catch(e){}
+}
+function loadState(){
+  try{
+    var raw=localStorage.getItem(STORE_KEY);
+    if(!raw)return;
+    var d=JSON.parse(raw);
+    if(d.W){
+      Object.keys(DEF).forEach(function(g){
+        if(d.W[g]){Object.keys(DEF[g]).forEach(function(k){
+          if(typeof d.W[g][k]==='number')W[g][k]=d.W[g][k];
+        });}
+      });
+    }
+    if(d.smin!==undefined)document.getElementById('smin').value=d.smin;
+    if(d.smax!==undefined)document.getElementById('smax').value=d.smax;
+    if(d.batch!==undefined)document.getElementById('batch').value=d.batch;
+    if(d.dedup!==undefined)document.getElementById('dedup').checked=!!d.dedup;
+    if(d.bad!==undefined)document.getElementById('bad').value=d.bad;
+  }catch(e){}
+}
+
+/* ================= UI 建立 ================= */
+function makeGrid(id,obj){
+  var el=document.getElementById(id);el.innerHTML='';
+  Object.keys(obj).forEach(function(k){
+    var d=document.createElement('div');d.className='cell';
+    var lab=document.createElement('span');lab.textContent=k;
+    var inp=document.createElement('input');inp.type='number';inp.min=0;inp.max=99;inp.value=obj[k];
+    inp.oninput=function(){obj[k]=Math.max(0,parseInt(inp.value,10)||0);};
+    d.appendChild(lab);d.appendChild(inp);el.appendChild(d);
+  });
+}
+function buildAll(){Object.keys(GRID_ID).forEach(function(key){makeGrid(GRID_ID[key],W[key]);});}
+function resetGroup(key){W[key]=JSON.parse(JSON.stringify(DEF[key]));makeGrid(GRID_ID[key],W[key]);syncResetWidths();saveState();}
+function resetAll(){W=JSON.parse(JSON.stringify(DEF));buildAll();syncResetWidths();saveState();}
+
+/* ================= 加權隨機與邊界規則 ================= */
+function pick(items,wfn){
+  var tot=0;items.forEach(function(it){tot+=Math.max(0,wfn(it));});
+  if(tot<=0)return items[Math.floor(Math.random()*items.length)];
+  var r=Math.random()*tot;
+  for(var i=0;i<items.length;i++){r-=Math.max(0,wfn(items[i]));if(r<=0)return items[i];}
+  return items[items.length-1];
+}
+function extraBad(){
+  return new Set(document.getElementById('bad').value.split(/[,，\s]+/).filter(Boolean));
+}
+function boundaryOk(x,y,B){
+  if(!x)return true;
+  if(y===x)return false;
+  if(FRIC.includes(x)&&FRIC.includes(y))return false;
+  if(x==='s'&&(y==='p'||y==='t'||y==='c'))return false;
+  return !B.has(x+y);
+}
+function onsetAdjOk(prevNuc,c){
+  if(!prevNuc)return true;
+  var last=prevNuc.charAt(prevNuc.length-1);
+  if(last==='i'&&c==='y')return false;
+  if(last==='u'&&c==='w')return false;
+  return true;
+}
+
+/* ================= 造詞核心 ================= */
+function genWord(n,B){
+  var syls=[];
+  var usedCC=false;
+  for(var i=0;i<n;i++){
+    var prev=i?syls[i-1]:null;
+    var prevCoda=prev?prev.coda:null;
+    var prevNuc=prev?prev.nuc:null;
+    var openPrev=!!prev&&!prevCoda;
+    var closed=Math.random()<P_CODA;
+    var tot=Object.values(W.type).reduce(function(a,b){return a+Math.max(0,b);},0)||1;
+    var pNone=Math.min(1,(Math.max(0,W.type.V)+Math.max(0,W.type.VC))/tot);
+    var oc;
+    if(prevCoda)oc=1;
+    else if(openPrev&&(prevNuc==='i'||prevNuc==='u'))oc=(Math.random()<P_ONSET_DOUBLE)?2:1;
+    else if(Math.random()<pNone)oc=0;
+    else oc=(Math.random()<P_ONSET_DOUBLE)?2:1;
+    if(oc===2&&usedCC)oc=1;
+    if(oc===2)usedCC=true;
+    var onset='';
+    if(oc===2){
+      onset=pick(CLUS,function(c){return W.clu[c];});
+    }else if(oc===1){
+      var ok=CONS.filter(function(c){return boundaryOk(prevCoda,c,B);});
+      if(openPrev)ok=ok.filter(function(c){return onsetAdjOk(prevNuc,c);});
+      if(!ok.length)ok=CONS;
+      onset=pick(ok,function(c){return W.con[c];});
+    }else{
+      if(openPrev&&DIPHS.includes(prevNuc)){
+        var ok2=CONS.filter(function(c){return boundaryOk(null,c,B)&&onsetAdjOk(prevNuc,c);});
+        if(!ok2.length)ok2=CONS;
+        onset=pick(ok2,function(c){return W.con[c];});
+      }
+    }
+    var nucKeys=Object.keys(W.nuc).filter(function(k){
+      if(DIPHS.includes(k)&&!(oc===1&&!closed))return false;
+      if(onset==='y'&&k==='i')return false;
+      if(onset==='w'&&k==='u')return false;
+      if(onset===''&&openPrev){
+        var last=prevNuc.charAt(prevNuc.length-1);
+        if(k.charAt(0)===last)return false;
+      }
+      return true;
+    });
+    if(!nucKeys.length){
+      nucKeys=['a','e','i','o','u'].filter(function(k){
+        if(onset==='y'&&k==='i')return false;
+        if(onset==='w'&&k==='u')return false;
+        if(onset===''&&openPrev){
+          var last=prevNuc.charAt(prevNuc.length-1);
+          if(k.charAt(0)===last)return false;
+        }
+        return true;
+      });
+    }
+    var nuc=pick(nucKeys,function(k){return W.nuc[k];});
+    var coda=closed?pick(CODA_OK,function(c){return W.coda[c];}):'';
+    syls.push({onset:onset,nuc:nuc,coda:coda,spell:onset+nuc+coda});
+  }
+  return syls;
+}
+
+/* ================= 狀態提示 ================= */
+var msgTimer=null;
+function flash(m){
+  var el=document.getElementById('msg');
+  el.textContent=m;
+  clearTimeout(msgTimer);
+  msgTimer=setTimeout(function(){el.textContent='';},2500);
+}
+
+/* ================= 複製（含降級備援） ================= */
+function legacyCopy(txt){
+  var ta=document.createElement('textarea');
+  ta.value=txt;
+  ta.style.position='fixed';
+  ta.style.opacity='0';
+  document.body.appendChild(ta);
+  ta.focus();
+  ta.select();
+  var ok=false;
+  try{ok=document.execCommand('copy');}catch(e){}
+  document.body.removeChild(ta);
+  return ok;
+}
+function copyOut(){
+  var txt=[].map.call(document.querySelectorAll('#out .w'),function(e){return e.textContent;}).join('\n');
+  if(!txt){flash('沒有可複製的結果，請先生成');return;}
+  var n=txt.split('\n').length;
+  var success=function(){flash('已複製 '+n+' 個詞');};
+  var fallback=function(){legacyCopy(txt)?success():flash('複製失敗，請手動選取輸出區文字');};
+  if(navigator.clipboard&&navigator.clipboard.writeText){
+    navigator.clipboard.writeText(txt).then(success).catch(fallback);
+  }else{
+    fallback();
+  }
+}
+
+/* ================= 執行與輸出 ================= */
+function run(){
+  var mn=Math.min(10,Math.max(1,+document.getElementById('smin').value||1));
+  var mx=Math.min(10,Math.max(1,+document.getElementById('smax').value||1));
+  if(mn>mx){var t=mn;mn=mx;mx=t;}
+  document.getElementById('smin').value=mn;
+  document.getElementById('smax').value=mx;
+  var batch=Math.min(100,Math.max(5,+document.getElementById('batch').value||10));
+  document.getElementById('batch').value=batch;
+  var dedup=document.getElementById('dedup').checked;
+  var B=extraBad(),seen=new Set(),lines=[];
+  var guard=batch*60;
+  while(lines.length<batch&&guard-->0){
+    var n=mn+Math.floor(Math.random()*(mx-mn+1));
+    var syls=genWord(n,B);
+    var word=syls.map(function(s){return s.spell;}).join('');
+    if(dedup&&seen.has(word))continue;
+    seen.add(word);
+    lines.push('<span class="w">'+word+'</span>');
+  }
+  document.getElementById('out').innerHTML=lines.join('\n')||'（權重全為 0，無法生成）';
+}
+
+/* ================= 初始化 ================= */
+loadState();
+buildAll();
+initResizeSync();
+initInputScroll();
+/* 任何輸入變動都自動保存 */
+document.addEventListener('input',function(e){
+  if(e.target&&e.target.tagName==='INPUT')saveState();
+});
+/* 註冊 Service Worker（離線關鍵；僅在 HTTPS 下生效，GitHub Pages 符合） */
+if('serviceWorker' in navigator){
+  window.addEventListener('load',function(){
+    navigator.serviceWorker.register('sw.js').catch(function(){});
+  });
+}
+</script>
+</main>
+</body>
+</html>
